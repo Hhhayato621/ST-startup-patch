@@ -1,0 +1,3 @@
+{"id":"y2k","name":"Y2K 手机","root":"y2k-startup","loaderClass":"y2k-init-loader",
+ "css":"css/y2k-phone-startup.css","dir":"img/y2k-phone-startup","preview":"y2k-phone-startup-preview.html",
+ "elapsed":{"selector":".y2k-phone","variable":"--y2k-elapsed"}}
