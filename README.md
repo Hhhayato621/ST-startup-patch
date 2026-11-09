@@ -23,11 +23,13 @@ curl -fsSL https://raw.githubusercontent.com/Hhhayato621/ST-startup-patch/main/i
 curl -fsSL https://raw.githubusercontent.com/Hhhayato621/ST-startup-patch/main/install.sh | bash -s uninstall
 ```
 
-## 查看现在装的是哪个
+## 查看现在装的是哪个、还有哪些能装
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Hhhayato621/ST-startup-patch/main/install.sh | bash -s status
 ```
+
+把 `status` 换成 `list`，只列出能装的动画。
 
 ## 注意
 
@@ -35,3 +37,16 @@ curl -fsSL https://raw.githubusercontent.com/Hhhayato621/ST-startup-patch/main/i
 - 酒馆不在 `~/SillyTavern` 也没关系，脚本会自己找。找不到时，在命令最后加上酒馆文件夹，例如 `… | bash -s typewriter ~/ST`。
 - 每次安装或卸载前，原来的文件会备份到酒馆文件夹里的 `.startup-patch-backup`。
 - 电脑上（macOS / Linux 终端）也能用同一行命令。
+
+## 加新动画（给作者看）
+
+在仓库里新建一个文件夹，文件夹名就是动画名（小写英文、数字或短横线，例如 `starry`），里面放：
+
+| 文件 | 内容 |
+|---|---|
+| `theme.json` | `{"name": "中文名", "root": "画面最外层的 class", "loaderClass": "加在 #loader 上的 class"}` |
+| `markup.html` | 动画画面的 HTML |
+| `startup.css` | 动画样式，图片地址写成 `/img/<动画名>-startup/文件名` |
+| `assets/` | 用到的图片、字体（可以没有） |
+
+传上去之后，安装命令最后写这个文件夹名就能装，不用改别的文件。

@@ -5,6 +5,7 @@
 #   ……| bash -s y2k         装 Y2K 手机
 #   ……| bash -s uninstall   卸载，恢复原样
 #   ……| bash -s status      查看现在装的是哪个
+#   ……| bash -s list        列出可以装的动画
 # 最后可以再加酒馆文件夹的位置，例如：…| bash -s typewriter ~/ST
 set -euo pipefail
 
@@ -18,10 +19,10 @@ TARGET="${2:-}"
 say()  { printf '%s\n' "$*"; }
 fail() { printf '\n操作失败：%s\n' "$*" >&2; exit 1; }
 
-case "$ACTION" in
-    typewriter|y2k|uninstall|status) ;;
-    *) fail "不认识「$ACTION」。可以用：typewriter（打字机）、y2k（Y2K 手机）、uninstall（卸载）、status（查看）。" ;;
-esac
+# 除了 uninstall / status / list，其余的名字都当作动画名（仓库里的文件夹名）。
+if ! printf '%s' "$ACTION" | grep -Eq '^[a-z0-9][a-z0-9-]*$'; then
+    fail "不认识「$ACTION」。写动画名（例如 typewriter、y2k），或者 uninstall（卸载）、status（查看）、list（列出动画）。"
+fi
 
 is_termux() { [ -n "${PREFIX:-}" ] && [ -d "$PREFIX" ] && case "$PREFIX" in *com.termux*) true ;; *) false ;; esac; }
 
@@ -35,7 +36,23 @@ if ! command -v node >/dev/null 2>&1; then
     fi
 fi
 
-# 2. 找到酒馆
+# 2. 下载补丁（MOI_PATCH_SOURCE 仅用于本地测试）
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/st-startup-patch.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+if [ -n "${MOI_PATCH_SOURCE:-}" ]; then
+    cp -R "$MOI_PATCH_SOURCE"/. "$WORK/"
+else
+    say "正在下载补丁……"
+    curl -fsSL "https://codeload.github.com/$REPO/tar.gz/refs/heads/main" | tar -xz -C "$WORK" --strip-components=1 \
+        || fail "补丁下载失败。请检查网络后重新粘贴命令。"
+fi
+
+if [ "$ACTION" = list ]; then
+    node "$WORK/patch.mjs" list
+    return 0
+fi
+
+# 3. 找到酒馆
 is_st() { [ -f "$1/server.js" ] && [ -f "$1/public/index.html" ] && [ -f "$1/public/script.js" ] && grep -qi '"name": *"sillytavern"' "$1/package.json" 2>/dev/null; }
 
 find_st() {
@@ -63,28 +80,11 @@ else
 fi
 say "找到酒馆：$ST"
 
-# 3. 下载补丁（MOI_PATCH_SOURCE 仅用于本地测试）
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/st-startup-patch.XXXXXX")"
-trap 'rm -rf "$WORK"' EXIT
-if [ -n "${MOI_PATCH_SOURCE:-}" ]; then
-    cp -R "$MOI_PATCH_SOURCE"/. "$WORK/"
-else
-    say "正在下载补丁……"
-    curl -fsSL "https://codeload.github.com/$REPO/tar.gz/refs/heads/main" | tar -xz -C "$WORK" --strip-components=1 \
-        || fail "补丁下载失败。请检查网络后重新粘贴命令。"
-fi
-
 # 4. 安装 / 卸载 / 查看
 case "$ACTION" in
-    typewriter|y2k) node "$WORK/$ACTION/patch.mjs" install "$ST" ;;
-    uninstall)      node "$WORK/typewriter/patch.mjs" uninstall "$ST" ;;
-    status)         node "$WORK/typewriter/patch.mjs" status "$ST" ;;
+    uninstall|status) node "$WORK/patch.mjs" "$ACTION" "$ST" ;;
+    *)                node "$WORK/patch.mjs" install "$ACTION" "$ST" ;;
 esac
-
-if [ "$ACTION" = typewriter ] || [ "$ACTION" = y2k ]; then
-    say ""
-    say "酒馆开着的话，直接刷新网页就能看到；没开就照常启动酒馆。"
-fi
 }
 
 main "$@"
