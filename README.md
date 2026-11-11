@@ -48,5 +48,8 @@ curl -fsSL https://raw.githubusercontent.com/Hhhayato621/ST-startup-patch/main/i
 | `markup.html` | 动画画面的 HTML |
 | `startup.css` | 动画样式，图片地址写成 `/img/<动画名>-startup/文件名` |
 | `assets/` | 用到的图片、字体（可以没有） |
+| `preview.html` | 自己做的预览页，可以带重播按钮（可以没有，没有就自动生成一个） |
+
+`theme.json` 里还可以加 `"keepPreloader": true`：动画一直留在最上层播到酒馆加载完，不会中途从头再播一遍。这时样式里要把酒馆自己的加载框藏起来，可以参考 `y2k/startup.css` 开头几行。
 
 传上去之后，安装命令最后写这个文件夹名就能装，不用改别的文件。

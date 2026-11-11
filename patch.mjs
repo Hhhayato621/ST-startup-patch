@@ -14,6 +14,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SUPPORTED = /^1\.(18|19)\./;
@@ -35,6 +36,8 @@ const STOCK_LOGO = [
 ].join('\n');
 const SCRIPT_START = "    initLoaderOverlay.classList.add('splash-screen');\n";
 const SCRIPT_END = "    const splashMessage = document.createElement('h2');";
+const STOCK_PREPEND = '    initLoaderOverlay.prepend(splashLogo);';
+const KEEP_PREPEND = '    if (!startupArtwork) initLoaderOverlay.prepend(splashLogo);';
 const FAVICON = '    <link rel="icon" type="image/x-icon" href="favicon.ico">';
 
 const fail = message => { throw Object.assign(new Error(message), { friendly: true }); };
@@ -75,8 +78,8 @@ function allKnown(themes, record) {
 
 function stockIndex(text, known) {
     const hrefs = Object.values(known).map(k => escape(k.css)).join('|');
-    // 去掉补丁加的样式表：带补丁标记的，或者指向已知动画样式的。
-    text = text.replace(new RegExp(`^[ \\t]*<link rel="stylesheet"[^>\\n]*(?:data-${MARK}|href="(?:${hrefs})")[^>\\n]*>\\n`, 'gm'), '');
+    // 去掉补丁加的样式表：带补丁标记的，或者指向已知动画样式的（可能带 ?v= 版本号）。
+    text = text.replace(new RegExp(`^[ \\t]*<link rel="stylesheet"[^>\\n]*(?:data-${MARK}|href="(?:${hrefs})(?:\\?[^"]*)?")[^>\\n]*>\\n`, 'gm'), '');
     // 预加载层里的动画整段拿掉，恢复成空的 <div id="preloader"></div>。
     text = text.replace(/<div id="preloader">[\s\S]*?(\n[ \t]*<div id="bg1">)/, '<div id="preloader"></div>$1');
     if (count(text, '<div id="preloader"></div>') !== 1 || count(text, FAVICON) !== 1) fail('index.html 的结构和酒馆 1.18 / 1.19 不一样，已停止，没有改任何文件。');
@@ -87,16 +90,34 @@ function stockScript(text) {
     const start = text.indexOf(SCRIPT_START);
     const end = text.indexOf(SCRIPT_END, start);
     if (start < 0 || end < 0 || count(text, SCRIPT_START) !== 1) fail('script.js 里找不到启动画面的代码，已停止，没有改任何文件。');
-    return text.slice(0, start + SCRIPT_START.length) + '\n' + STOCK_LOGO + '\n\n' + text.slice(end);
+    text = text.slice(0, start + SCRIPT_START.length) + '\n' + STOCK_LOGO + '\n\n' + text.slice(end);
+    // 「保留预加载层」的动画还改了插入启动图的那一行，也要还原，不然酒馆启动会报错。
+    text = text.replace(KEEP_PREPEND, STOCK_PREPEND);
+    if (count(text, STOCK_PREPEND) !== 1 || text.includes('startupArtwork')) fail('script.js 里启动画面的代码和酒馆 1.18 / 1.19 不一样，已停止，没有改任何文件。');
+    return text;
 }
 
-function patchedIndex(stock, theme, markup) {
+function patchedIndex(stock, theme, markup, version) {
     return stock
-        .replace(FAVICON, `    <link rel="stylesheet" href="${theme.css}" data-${MARK}="${theme.id}">\n${FAVICON}`)
+        .replace(FAVICON, `    <link rel="stylesheet" href="${theme.css}?v=${version}" data-${MARK}="${theme.id}">\n${FAVICON}`)
         .replace('<div id="preloader"></div>', `<div id="preloader">${markup}</div>`);
 }
 
 function patchedScript(stock, theme) {
+    // keepPreloader：预加载层留在最上面一直播到酒馆加载完，不再复制一份到加载框里。
+    if (theme.keepPreloader) {
+        const block = [
+            `    // ${MARK}: ${theme.id}。预加载层里的动画一直播到酒馆加载完，由酒馆自己移除。`,
+            `    const startupArtwork = document.querySelector('#preloader .${theme.root}');`,
+            "    const splashLogo = document.createElement('img');",
+            '    if (startupArtwork) {',
+            `        initLoaderOverlay.classList.add('${theme.loaderClass}');`,
+            '    } else {',
+            ...STOCK_LOGO.split('\n').slice(1).map(line => '    ' + line),
+            '    }',
+        ].join('\n');
+        return stock.replace(STOCK_LOGO, block).replace(STOCK_PREPEND, KEEP_PREPEND);
+    }
     const elapsed = theme.elapsed
         ? `\n        // 把已经播放的时间交给接手的画面，动画不会从头再来一遍。\n        const played = startupArtwork.querySelector('${theme.elapsed.selector}')?.getAnimations?.()[0]?.currentTime;\n        if (Number.isFinite(played)) splashLogo.style.setProperty('${theme.elapsed.variable}', Math.max(0, played) + 'ms');`
         : '';
@@ -187,9 +208,13 @@ async function main() {
     let nextIndex = index;
     let nextScript = script;
     let markup;
+    let css;
     if (theme) {
         markup = (await fs.readFile(path.join(theme.folder, 'markup.html'), 'utf8')).trim();
-        nextIndex = patchedIndex(index, theme, markup);
+        css = await fs.readFile(path.join(theme.folder, 'startup.css'));
+        // 样式地址带上内容指纹，动画更新后浏览器不会继续用旧的缓存。
+        const fingerprint = createHash('sha256').update(css).digest('hex').slice(0, 8);
+        nextIndex = patchedIndex(index, theme, markup, fingerprint);
         nextScript = patchedScript(script, theme);
         if (nextScript === script) fail('script.js 写入失败，已停止，没有改任何文件。');
     }
@@ -207,14 +232,17 @@ async function main() {
         await fs.rm(path.join(pub, k.dir), { recursive: true, force: true });
     }
     if (theme) {
-        await writeAtomic(path.join(pub, theme.css), await fs.readFile(path.join(theme.folder, 'startup.css')));
+        await writeAtomic(path.join(pub, theme.css), css);
         const assets = path.join(theme.folder, 'assets');
         if (await exists(assets)) {
             for (const file of await fs.readdir(assets)) {
                 await writeAtomic(path.join(pub, theme.dir, file), await fs.readFile(path.join(assets, file)));
             }
         }
-        await writeAtomic(path.join(pub, theme.preview), `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${theme.name} 载入动画预览</title><link rel="stylesheet" href="/${theme.css}"></head><body style="margin:0">${markup}</body></html>`);
+        // 动画文件夹里有 preview.html 就用它（可以带重播按钮），没有就自动生成一个。
+        const ownPreview = path.join(theme.folder, 'preview.html');
+        if (await exists(ownPreview)) await writeAtomic(path.join(pub, theme.preview), await fs.readFile(ownPreview));
+        else await writeAtomic(path.join(pub, theme.preview), `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${theme.name} 载入动画预览</title><link rel="stylesheet" href="/${theme.css}"></head><body style="margin:0">${markup}</body></html>`);
     }
     await writeAtomic(indexFile, back(nextIndex));
     await writeAtomic(scriptFile, back(nextScript));

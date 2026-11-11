@@ -4,7 +4,19 @@
       <linearGradient id="y2k-pink" x2=".35" y2="1"><stop stop-color="#ffb8de"/><stop offset="1" stop-color="#e94999"/></linearGradient>
       <symbol id="y2k-heart" viewBox="0 0 32 32"><path fill="url(#y2k-pink)" stroke="#fff7" d="M16 28C11 24 2 18 2 11c0-8 10-10 14-3 4-7 14-5 14 3 0 7-9 13-14 17Z"/><path fill="none" stroke="#fff9" stroke-linecap="round" stroke-width="2" d="M6 11c0-3 2-4 4-4"/></symbol>
     </defs></svg>
-    <img class="y2k-phone" src="/img/y2k-phone-startup/phone.png" width="1254" height="1254" fetchpriority="high" alt="带星星挂坠的粉色翻盖手机">
+    <svg class="y2k-phone" viewBox="0 0 1254 1254" role="img" aria-label="带星星挂坠的粉色翻盖手机">
+      <defs>
+        <image id="y2k-phone-art" href="/img/y2k-phone-startup/phone.png" width="1254" height="1254"/>
+        <clipPath id="y2k-phone-body"><path clip-rule="evenodd" d="M0 0H1254V1254H0Z M240 1006H341L371 936 386 827 426 719 458 657 466 628 439 618 412 647 240 860Z"/></clipPath>
+        <clipPath id="y2k-phone-charm"><path d="M240 1006H341L371 936 386 827 426 719 458 657 466 628 439 618 412 647 240 860Z"/></clipPath>
+        <clipPath id="y2k-phone-screen"><path d="M609 313L711 318 707 404 606 415Z"/></clipPath>
+        <radialGradient id="y2k-phone-signal"><stop stop-color="#fff"/><stop offset=".31" stop-color="#fff5c2"/><stop offset=".62" stop-color="#ffa1e4" stop-opacity=".68"/><stop offset="1" stop-color="#ffa1e4" stop-opacity="0"/></radialGradient>
+      </defs>
+      <use href="#y2k-phone-art" clip-path="url(#y2k-phone-body)"/>
+      <g class="y2k-charm"><use href="#y2k-phone-art" clip-path="url(#y2k-phone-charm)"/></g>
+      <g clip-path="url(#y2k-phone-screen)"><use class="y2k-screen-beat" href="#y2k-phone-art"/></g>
+      <circle class="y2k-signal" cx="831" cy="28" r="18" fill="url(#y2k-phone-signal)"/>
+    </svg>
     <svg class="y2k-particle y2k-heart" aria-hidden="true" style="--left:21%;--top:16%;--size:6%;--dx:220%;--dy:180%;--tilt:-21deg;--delay:2040ms"><use href="#y2k-heart"/></svg>
     <svg class="y2k-particle y2k-heart" aria-hidden="true" style="--left:77%;--top:12%;--size:8%;--dx:-160%;--dy:135%;--tilt:16deg;--delay:2310ms"><use href="#y2k-heart"/></svg>
     <svg class="y2k-particle y2k-heart" aria-hidden="true" style="--left:69%;--top:56%;--size:6%;--dx:-190%;--dy:95%;--tilt:-13deg;--delay:2450ms"><use href="#y2k-heart"/></svg>
@@ -21,8 +33,9 @@
           <span>新着メール</span>
           <time datetime="22:08">22:08</time>
         </div>
-        <strong>好きです</strong>
+        <strong aria-label="好きです"><span class="y2k-typing-line" aria-hidden="true"><span class="y2k-letter" style="--letter-index:0">好</span><span class="y2k-letter" style="--letter-index:1">き</span><span class="y2k-letter" style="--letter-index:2">で</span><span class="y2k-letter" style="--letter-index:3">す</span><i class="y2k-cursor"></i></span></strong>
       </div>
     </div>
+    <div class="y2k-receive-status" lang="ja" aria-label="受信中">受信中<span aria-hidden="true"><span style="--dot-index:0">.</span><span style="--dot-index:1">.</span><span style="--dot-index:2">.</span></span></div>
   </div>
 </div>

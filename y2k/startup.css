@@ -1,18 +1,33 @@
 
-#preloader:has(.y2k-startup) { background: #eef2f8 !important; backdrop-filter: none !important; }
+#preloader:has(.y2k-startup) {
+  position: fixed; inset: 0; z-index: 999999;
+  width: 100vw; height: 100vh; width: 100dvw; height: 100dvh;
+  background: #f8edef !important; backdrop-filter: none !important;
+}
+/* Keep the artwork in the viewport layer until the native loader removes it. */
+dialog:has(#loader.y2k-init-loader) { opacity: 0 !important; }
+dialog:has(#loader.y2k-init-loader)::backdrop { background: transparent !important; backdrop-filter: none !important; }
 #loader.y2k-init-loader { filter: none !important; }
 #loader.y2k-init-loader > :is(#load-spinner,.splash-message) { display: none !important; }
 .y2k-startup {
   position: fixed !important; inset: 0 !important; display: grid; place-items: center;
-  width: 100%; height: 100%; overflow: hidden; margin: 0 !important;
-  background:
-    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201200%20850%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%0A%3Cdefs%3E%0A%3ClinearGradient%20id%3D%22glass%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.84%22%2F%3E%3Cstop%20offset%3D%22.3%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.09%22%2F%3E%3Cstop%20offset%3D%22.73%22%20stop-color%3D%22%23ccd6ec%22%20stop-opacity%3D%22.12%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23a6a9c5%22%20stop-opacity%3D%22.33%22%2F%3E%3C%2FlinearGradient%3E%0A%3ClinearGradient%20id%3D%22rim%22%20x1%3D%22.1%22%20y1%3D%220%22%20x2%3D%22.84%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff%22%2F%3E%3Cstop%20offset%3D%22.34%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.18%22%2F%3E%3Cstop%20offset%3D%22.7%22%20stop-color%3D%22%23b8bad4%22%20stop-opacity%3D%22.65%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.92%22%2F%3E%3C%2FlinearGradient%3E%0A%3ClinearGradient%20id%3D%22shine%22%20x2%3D%22.8%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23fff%22%20stop-opacity%3D%22.9%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20d%3D%22M-156%20471C-30%20427%2050%20581%20216%20634S497%20619%20641%20710%20732%20880%20801%20947H-156Z%22%20fill%3D%22url%28%23glass%29%22%20stroke%3D%22url%28%23rim%29%22%20stroke-width%3D%225%22%2F%3E%0A%3Cpath%20d%3D%22M-124%20486C-13%20449%2061%20590%20212%20640S480%20638%20614%20712%22%20fill%3D%22none%22%20stroke%3D%22url%28%23shine%29%22%20stroke-width%3D%229%22%20opacity%3D%22.48%22%2F%3E%0A%3Cpath%20d%3D%22M1272-120H625C653%206%20809%2021%20868%20130s67%20183%20181%20206%20189-22%20269%2058Z%22%20fill%3D%22url%28%23glass%29%22%20stroke%3D%22url%28%23rim%29%22%20stroke-width%3D%225%22%2F%3E%0A%3Cpath%20d%3D%22M650-57C703%2023%20827%2038%20877%20129s65%20174%20172%20197%22%20fill%3D%22none%22%20stroke%3D%22url%28%23shine%29%22%20stroke-width%3D%229%22%20opacity%3D%22.6%22%2F%3E%0A%3C%2Fsvg%3E") center / cover no-repeat,
-    radial-gradient(ellipse at 22% 20%,#fff 0%,transparent 57%),
-    radial-gradient(ellipse at 80% 75%,#d8d8eb 0%,transparent 57%),
-    radial-gradient(ellipse at 68% 34%,#f3e6ee 0%,transparent 45%),
-    linear-gradient(145deg,#eef2f8,#f7f6fa 52%,#e0e6f1);
+  width: 100vw; height: 100vh; width: 100dvw; height: 100dvh;
+  overflow: hidden; margin: 0 !important;
+  background: #f8edef url("/img/y2k-phone-startup/background.jpg") center / cover no-repeat;
+  isolation: isolate;
+
   color: #84204e; font-family: system-ui,sans-serif;
 }
+.y2k-startup::before {
+  content: ""; position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at 10% -15%, #fffc, transparent 57%),
+              radial-gradient(ellipse at 105% 105%, #fff7, transparent 55%),
+              linear-gradient(135deg, #fff4, transparent 39%, #fff1 68%, #fff5);
+  backdrop-filter: blur(.55px) saturate(1.04) brightness(1.025);
+  -webkit-backdrop-filter: blur(.55px) saturate(1.04) brightness(1.025);
+}
+
 .y2k-startup * { box-sizing: border-box; }
 .y2k-startup .y2k-stage { width: min(616px, calc(100vw - 24px), 100vh); width: min(616px, calc(100vw - 24px), 100dvh); }
 .y2k-stage { position: relative; aspect-ratio: 1.13; container-type: inline-size; isolation: isolate; }
@@ -20,6 +35,16 @@
   position: absolute; width: 72%; height: auto; left: 7%; top: 7%; z-index: 1;
   transform-origin: 48% 77%; filter: drop-shadow(0 12px 12px #af498643);
 }
+.y2k-screen-beat, .y2k-charm { transform-box: view-box; }
+.y2k-screen-beat { transform-origin: 52.4% 29%; }
+.y2k-charm { transform-origin: 36% 50%; }
+.y2k-signal { opacity: 0; }
+.y2k-receive-status {
+  position: absolute; left: 43%; bottom: 3%; transform: translateX(-50%);
+  color: #864466; font: 650 clamp(10px, 2.6cqw, 15px)/1.2 ui-monospace, monospace !important;
+  letter-spacing: .12em; white-space: nowrap; text-shadow: 0 1px #fff;
+}
+.y2k-receive-status span { display: inline-block; }
 .y2k-sms {
   position: absolute; z-index: 3; left: 55%; top: 24%; width: 37cqw;
   padding: .75cqw; border: 1px solid #b96a9c; border-radius: 2.8cqw;
@@ -50,8 +75,18 @@
   display: block; padding: 2.2cqw 2.8cqw 2.75cqw; color: #632047;
   background: repeating-linear-gradient(0deg,#8c337705 0 1px,transparent 1px 3px),
               linear-gradient(150deg,#fffafd,#f9e1f2);
-  font-size: 5.8cqw; line-height: 1.35; font-weight: 700; letter-spacing: .065em;
+  font-size: 5.5cqw; line-height: 1.35; font-weight: 700; letter-spacing: .065em;
   text-shadow: 0 1px #fff; white-space: nowrap;
+}
+.y2k-typing-line { display: inline-flex; align-items: center; }
+.y2k-letter { display: block; overflow: hidden; }
+.y2k-cursor {
+  display: inline-block; width: .085em; height: .84em; margin-left: .15em;
+  background: #8e3566; opacity: 0;
+}
+.y2k-bubble::after {
+  content: ""; position: absolute; inset: 5%; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle at 28% 25%, #fffe, transparent 33%);
 }
 .y2k-particle {
   position: absolute; left: var(--left); top: var(--top); width: var(--size); aspect-ratio: 1;
@@ -63,9 +98,30 @@
   background: radial-gradient(circle at 30% 26%,#fff 1%,#fff9 9%,transparent 24%), radial-gradient(circle at 38% 38%,#fff1 29%,#fbc9eb50 58%,#db9ceb8c 79%,#fff9 100%);
   box-shadow: inset 0 0 8px #fff9,0 2px 8px #d48bd340;
 }
-.y2k-phone { animation: y2k-ring 1200ms ease-in-out calc(330ms - var(--y2k-elapsed, 0ms)) both; }
-.y2k-sms { animation: y2k-pop 620ms cubic-bezier(.16,.78,.28,1) calc(1680ms - var(--y2k-elapsed, 0ms)) both; }
-.y2k-particle { animation: y2k-float-in 1500ms cubic-bezier(.12,.7,.22,1) calc(var(--delay) - var(--y2k-elapsed, 0ms)) both; }
+.y2k-phone { animation: y2k-ring 1200ms ease-in-out 330ms both; }
+.y2k-sms { animation: y2k-pop 620ms cubic-bezier(.16,.78,.28,1) 1680ms both; }
+.y2k-particle { animation: y2k-float-in 1500ms cubic-bezier(.12,.7,.22,1) var(--delay) both,
+    y2k-drift calc(4100ms + var(--delay)) ease-in-out calc(var(--delay) + 1500ms) infinite; }
+.y2k-bubble::after { animation: y2k-gleam calc(4700ms + var(--delay)) ease-in-out calc(var(--delay) + 1300ms) infinite; }
+.y2k-screen-beat { animation: y2k-heartbeat 2600ms ease-in-out 3500ms infinite; }
+.y2k-charm { animation: y2k-sway 4600ms ease-in-out 1550ms infinite; }
+.y2k-signal { animation: y2k-gleam 3300ms ease-in-out 1800ms infinite; }
+.y2k-letter { animation: y2k-reveal 100ms steps(1,end) calc(2200ms + var(--letter-index) * 195ms) backwards; }
+.y2k-cursor { animation: y2k-blink 2220ms step-end 1950ms both; }
+.y2k-receive-status span { animation: y2k-dots 1500ms steps(1,end) calc(var(--dot-index) * 210ms) infinite both; }
+@keyframes y2k-reveal {
+  from { max-inline-size: 0; opacity: 0; }
+  to { max-inline-size: 1.2em; opacity: 1; }
+}
+@keyframes y2k-blink {
+  0%, 63%, 87% { opacity: 1; }
+  51%, 75%, 100% { opacity: 0; }
+}
+@keyframes y2k-dots { 0%, 72% { opacity: .2; } 21%, 71% { opacity: 1; } }
+@keyframes y2k-sway { 0%, 50%, 100% { transform: rotate(0); } 25% { transform: rotate(1.9deg); } 75% { transform: rotate(-1.9deg); } }
+@keyframes y2k-heartbeat { 0%, 14%, 30%, 100% { transform: none; } 7% { transform: scale(1.12); } 22% { transform: scale(1.07); } }
+@keyframes y2k-gleam { 0%, 10%, 31%, 100% { opacity: 0; } 19% { opacity: .88; } }
+@keyframes y2k-drift { 0%, 100% { translate: 0 0; } 50% { translate: 0 -1cqw; } }
 @keyframes y2k-ring {
   0%,100% { transform: none; }
   11% { transform: translateX(-2.2%) rotate(-7deg); }
@@ -90,5 +146,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .y2k-phone, .y2k-sms, .y2k-particle { animation: none; }
+  .y2k-stage, .y2k-stage *, .y2k-stage *::after { animation: none !important; }
+  .y2k-cursor { display: none; }
 }
