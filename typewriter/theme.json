@@ -1,3 +1,10 @@
-{"id":"typewriter","name":"打字机","root":"tw-startup","loaderClass":"tw-init-loader",
- "css":"css/typewriter-startup.css","dir":"img/typewriter-startup","preview":"typewriter-startup-preview.html",
- "elapsed":{"selector":".tw-startup-word","variable":"--tw-elapsed"}}
+{
+  "id": "typewriter",
+  "name": "打字机",
+  "root": "tw-startup",
+  "loaderClass": "tw-init-loader",
+  "css": "css/typewriter-startup.css",
+  "dir": "img/typewriter-startup",
+  "preview": "typewriter-startup-preview.html",
+  "keepPreloader": true
+}
